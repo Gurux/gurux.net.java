@@ -330,28 +330,26 @@ class GXSynchronousMediaBase
         {
             nFound = args.getCount();
         }
-        if (args.getAllData()) //If all data is copied.
-        {
-            nFound = m_ReceivedSize;
-        }
-        //Convert bytes to object.
-        byte[] tmp = new byte[nFound];
+        Object data;
         synchronized (m_ReceivedSync)
         {
+            if (args.getAllData()) //If all data is copied.
+            {
+                nFound = m_ReceivedSize;
+            }
+            //Convert bytes to object.
+            byte[] tmp = new byte[nFound];
             System.arraycopy(m_Received, 0, tmp, 0, nFound);
-        }
-        int[] readBytes = new int[1]; 
-        Object data = byteArrayToObject(tmp, args.getReplyType(), readBytes);
-        //Remove read data.
-        m_ReceivedSize -= nFound;
-        //Received size can go less than zero if we have received data and we try to read more.
-        if (m_ReceivedSize < 0)
-        {
-            m_ReceivedSize = 0;
-        }
-        if (m_ReceivedSize != 0)
-        {
-            synchronized (m_ReceivedSync)
+            int[] readBytes = new int[1]; 
+            data = byteArrayToObject(tmp, args.getReplyType(), readBytes);
+            //Remove read data.
+            m_ReceivedSize -= nFound;
+            //Received size can go less than zero if we have received data and we try to read more.
+            if (m_ReceivedSize < 0)
+            {
+                m_ReceivedSize = 0;
+            }
+            if (m_ReceivedSize != 0)
             {
                 System.arraycopy(m_Received, nFound, m_Received, 0, m_ReceivedSize);
             }
@@ -376,7 +374,7 @@ class GXSynchronousMediaBase
                 }
                 oldReplySize = Array.getLength(oldArray);
                 int len = oldReplySize + Array.getLength(newArray);
-                Array arr = null;//Mikko (Array)Activator.CreateInstance(T.class, len);
+                Array arr = null;//TODO: (Array)Activator.CreateInstance(T.class, len);
                 //Copy old values.
                 System.arraycopy(args.getReply(), 0, arr, 0, Array.getLength(oldArray));
                 //Copy new values.
@@ -390,6 +388,28 @@ class GXSynchronousMediaBase
                 str += (String)data;
                 data = str;
                 args.setReply((T)data);
+            }
+            else if (args.getReply() instanceof byte[])
+            {
+                byte[] oldArray = (byte[])args.getReply();
+                byte[] newArray = (byte[]) data;
+                if (newArray == null)
+                {
+                    throw new IllegalArgumentException();
+                }
+                oldReplySize = Array.getLength(oldArray);
+                int len = oldReplySize + Array.getLength(newArray);
+                byte[] arr = new byte[len];
+                //Copy old values.
+                System.arraycopy((byte[]) args.getReply(), 0, arr, 0, Array.getLength(oldArray));
+                //Copy new values.
+                System.arraycopy(newArray, 0, arr, Array.getLength(oldArray), Array.getLength(newArray));
+                Object tmp2 = arr;
+                args.setReply((T)tmp2);
+            }
+            else
+            {
+                throw new RuntimeException("Invalid reply type");
             }
         }
         return retValue;

@@ -60,8 +60,8 @@ public class GXNet implements IGXMedia
     private int privateMaxClientCount;
     private Object privateEop;        
     private int ConfigurableSettings;
-    private List<IGXMediaListener> MediaListeners = new ArrayList<>();
-    private List<IGXNetListener> NetListeners = new ArrayList<>();
+    private List<IGXMediaListener> MediaListeners = new ArrayList<IGXMediaListener>();
+    private List<IGXNetListener> NetListeners = new ArrayList<IGXNetListener>();
     ReceiveThread Receiver = null;
     /** 
      Constructor.
@@ -245,7 +245,7 @@ public class GXNet implements IGXMedia
      @see Close Close 
     */
     @Override
-    public final void send(Object data, String receiver) throws IOException
+    public final void send(Object data, String receiver) throws Exception
     {
         if (m_Socket == null)
         {
@@ -337,7 +337,7 @@ public class GXNet implements IGXMedia
      @see Close Close
     */
     @Override
-    public final void open() throws IOException
+    public final void open() throws Exception
     {
         close();
         try
@@ -351,11 +351,11 @@ public class GXNet implements IGXMedia
             {
                 if (getProtocol() == NetworkType.TCP)
                 {
-                    m_Socket = new ServerSocket(getPort());
+                    m_Socket = (Closeable) new ServerSocket(getPort());
                 }
                 else if (getProtocol() == NetworkType.UDP)
                 {
-                   m_Socket = new DatagramSocket();
+                   m_Socket = (Closeable) new DatagramSocket();
                 }
                 if (m_Trace.ordinal() >= TraceLevel.INFO.ordinal())
                 {
@@ -369,11 +369,11 @@ public class GXNet implements IGXMedia
                 // Create a stream-based, TCP socket using the InterNetwork Address Family. 
                 if (getProtocol() == NetworkType.TCP)
                 {
-                    m_Socket = new Socket(getHostName(), getPort());
+                    m_Socket = (Closeable) new Socket(getHostName(), getPort());
                 }
                 else if (getProtocol() == NetworkType.UDP)
                 {
-                   m_Socket = new DatagramSocket();
+                   m_Socket = (Closeable) new DatagramSocket();
                 }
                 else
                 {
@@ -601,13 +601,13 @@ public class GXNet implements IGXMedia
     public final String getSettings()
     {        
         return null;
-        //Mikko
+        //TODO:
     }
     
     @Override
     public final void setSettings(String value)
     {   
-        //Mikko
+        //TODO:
     }
     
     @Override
