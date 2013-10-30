@@ -22,13 +22,13 @@ Before use you must set following settings:
 * Protocol
 
 It is also good to add listener to listen following events.
-* OnError
-* OnReceived
-* OnMediaStateChange
+* onError
+* onReceived
+* onMediaStateChange
 
 and if in server mode following events might be important.
-* OnClientConnected
-* OnClientDisconnected                
+* onClientConnected
+* onClientDisconnected                
 
 ```java
 
@@ -150,7 +150,7 @@ cl.addListener(this);
 Data can be also send as syncronous if needed.
 
 ```java
-synchronized (Media.getSynchronous())
+synchronized (cl.getSynchronous())
 {
     String reply = "";    
     ReceiveParameters<byte[]> p = new ReceiveParameters<byte[]>(byte[].class);    
@@ -159,9 +159,9 @@ synchronized (Media.getSynchronous())
     //How long reply is waited.   
     p.setWaitTime(1000);          
     cl.send("Hello World!", null);
-    if (!gxNet1.receive(p))
+    if (!cl.receive(p))
     {
-		throw new RuntimeException("Failed to receive response..");
+        throw new RuntimeException("Failed to receive response..");
     }
 }
 ```
