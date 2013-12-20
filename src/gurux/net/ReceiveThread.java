@@ -192,7 +192,7 @@ class ReceiveThread extends Thread
             int cnt = in.available();
             if (BufferPosition + cnt > 1024)
             {
-                cnt = 1024 - BufferPosition;
+                cnt = 1024 - BufferPosition - count;
             }
             count += in.read(Buffer, BufferPosition + count, cnt);                    
             if (count == 1024)

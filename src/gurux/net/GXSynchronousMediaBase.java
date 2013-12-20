@@ -35,6 +35,7 @@
 package gurux.net;
 
 import gurux.common.ReceiveParameters;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 
@@ -66,6 +67,19 @@ class GXSynchronousMediaBase
             b = java.nio.ByteBuffer.allocate(4);
             b.putInt(((Number)data).intValue());
             return b.array();
+        }
+        if (data instanceof String)
+        {
+            try 
+            {
+                String str = (String)data;
+                b = java.nio.ByteBuffer.wrap(str.getBytes("ASCII"));
+                return b.array();
+            }
+            catch (UnsupportedEncodingException ex) 
+            {
+                throw new RuntimeException(ex.getMessage());
+            }
         }
         throw new RuntimeException("Unknown data type " + 
                 data.getClass().getName());
@@ -129,7 +143,7 @@ class GXSynchronousMediaBase
     {
         synchronized (m_ReceivedSync)
         {
-            //Alocate new buffer.
+            //Allocate new buffer.
             if (m_ReceivedSize + count > m_Received.length)
             {
                 byte[] tmp = new byte[2 * m_Received.length];
@@ -305,8 +319,13 @@ class GXSynchronousMediaBase
                         if (args.getEop() instanceof Array)
                         {
                             for (Object it : (Object[]) args.getEop())
-                            {                                
-                                nFound = indexOf(m_Received, getAsByteArray(it), index, m_ReceivedSize);
+                            {           
+                                byte[] term = getAsByteArray(it);
+                                if (term.length != 1 && m_ReceivedSize - index < term.length)
+                                {
+                                    index = m_ReceivedSize - term.length;
+                                }
+                                nFound = indexOf(m_Received, term, index, m_ReceivedSize);
                                 if (nFound != -1)
                                 {
                                     break;
@@ -315,12 +334,16 @@ class GXSynchronousMediaBase
                         }
                         else
                         {
+                            if (terminator.length != 1 && m_ReceivedSize - index < terminator.length)
+                            {
+                                index = m_ReceivedSize - terminator.length;
+                            }
                             nFound = indexOf(m_Received, terminator, index, m_ReceivedSize);
                         }
                         m_LastPosition = m_ReceivedSize;
                         if (nFound != -1)
                         {
-                            ++nFound;
+                            nFound += terminator.length;
                         }
                 }
             }
@@ -363,26 +386,8 @@ class GXSynchronousMediaBase
             args.setReply((T)data);
         }
         else
-        {
-            if (args.getReply() instanceof Array)
-            {
-                Object[] oldArray = (Object[])args.getReply();
-                Array newArray = (Array)((data instanceof Array) ? data : null);
-                if (newArray == null)
-                {
-                    throw new IllegalArgumentException();
-                }
-                oldReplySize = Array.getLength(oldArray);
-                int len = oldReplySize + Array.getLength(newArray);
-                Array arr = null;//TODO: (Array)Activator.CreateInstance(T.class, len);
-                //Copy old values.
-                System.arraycopy(args.getReply(), 0, arr, 0, Array.getLength(oldArray));
-                //Copy new values.
-                System.arraycopy(newArray, 0, arr, Array.getLength(oldArray), Array.getLength(newArray));
-                Object tmp2 = arr;
-                args.setReply((T)tmp2);
-            }
-            else if (args.getReply() instanceof String)
+        {            
+            if (args.getReply() instanceof String)
             {
                 String str = (String) args.getReply();
                 str += (String)data;

@@ -224,6 +224,18 @@ public class GXNet implements IGXMedia
     {
         this.ConfigurableSettings = value;
     }
+    
+     /*
+     * Show media properties.
+     */
+    @Override 
+    public boolean properties(javax.swing.JFrame parent)
+    {
+        GXSettings dlg = new GXSettings(parent, true, this);
+        dlg.pack();
+        dlg.setVisible(true);    
+        return dlg.Accepted;
+    }
 
     /**    
      Displays the copyright of the control, user license, and version information, in a dialog box. 
