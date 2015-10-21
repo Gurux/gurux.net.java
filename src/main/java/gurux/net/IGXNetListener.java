@@ -34,52 +34,29 @@
 
 package gurux.net;
 
-/** 
-    Argument class for IGXMedia connection and disconnection events.
-*/
-public class ConnectionEventArgs
-{
-    private String privateInfo;
-    private boolean privateAccept;
+/**
+ * Network listener interface.
+ * 
+ * @author Gurux Ltd
+ */
+public interface IGXNetListener {
+    /**
+     * Called when the client is establishing a connection with a GXNet Server.
+     * 
+     * @param sender
+     *            The source of the event.
+     * @param e
+     *            Event arguments.
+     */
+    void onClientConnected(final Object sender, final ConnectionEventArgs e);
 
-    /** 
-     Constructor
-    */
-    public ConnectionEventArgs()
-    {
-        setAccept(true);
-    }
-
-    /** 
-     Constructor
-    */
-    public ConnectionEventArgs(String info)
-    {
-        setAccept(true);
-        setInfo(info);
-    }
-
-    /** 
-     Media depend information.
-    */
-    public final String getInfo()
-    {
-        return privateInfo;
-    }
-    public final void setInfo(String value)
-    {
-        privateInfo = value;
-    }
-
-    /** 
-     False, if the client is not accepted to connect.
-    */
-    public final boolean getAccept()
-    {
-        return privateAccept;
-    }
-    public final void setAccept(boolean value)
-    {
-        privateAccept = value;
-    }
+    /**
+     * Called when the client has been disconnected from the GXNet server.
+     * 
+     * @param sender
+     *            The source of the event.
+     * @param e
+     *            Event arguments.
+     */
+    void onClientDisconnected(final Object sender, final ConnectionEventArgs e);
 }
