@@ -14,11 +14,13 @@ If you have problems you can ask your questions in Gurux [Forum](http://www.guru
 
 You can get source codes from http://www.github.com/gurux or if you use Maven add this to your POM-file:
 
+```java
 <dependency>
   <groupId>org.gurux</groupId>
   <artifactId>gurux.net</artifactId>
   <version>1.0.4</version>
 </dependency>
+```
 
 Simple example
 =========================== 
