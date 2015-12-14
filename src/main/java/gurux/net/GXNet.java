@@ -149,15 +149,15 @@ public class GXNet implements IGXMedia, AutoCloseable {
      *            Used protocol.
      * @param name
      *            Host name.
-     * @param port
-     *            Client port.
+     * @param portNo
+     *            Client port number.
      */
     public GXNet(final NetworkType networkType, final String name,
-            final int port) {
+            final int portNo) {
         this();
         setProtocol(networkType);
         setHostName(name);
-        setPort(port);
+        setPort(portNo);
     }
 
     /**
@@ -165,11 +165,11 @@ public class GXNet implements IGXMedia, AutoCloseable {
      * 
      * @param networkType
      *            Used protocol.
-     * @param port
+     * @param portNo
      *            Server port.
      */
-    public GXNet(final NetworkType networkType, final int port) {
-        this(networkType, null, port);
+    public GXNet(final NetworkType networkType, final int portNo) {
+        this(networkType, null, portNo);
         this.setServer(true);
     }
 
@@ -364,7 +364,9 @@ public class GXNet implements IGXMedia, AutoCloseable {
         }
         if (this.getServer()) {
             if (getProtocol() == NetworkType.TCP) {
-                ((Socket) socket).getOutputStream().write(buff);
+                if (receiver.getClient() != null) {
+                    receiver.getClient().getOutputStream().write(buff);
+                }
             } else if (getProtocol() == NetworkType.UDP) {
                 InetAddress addr = InetAddress.getByName(getHostName());
                 DatagramPacket p =

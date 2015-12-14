@@ -61,7 +61,7 @@ class ReceiveThread extends Thread {
     /**
      * Server socket.
      */
-    private ServerSocket serverSocket;
+    private final ServerSocket serverSocket;
     /**
      * Parent component where notifies are send.
      */
@@ -69,11 +69,11 @@ class ReceiveThread extends Thread {
     /**
      * Client TCP/IP socket to listen.
      */
-    private Socket tcpSocket;
+    private Socket tcpSocket = null;
     /**
      * Client UDP socket.
      */
-    private DatagramSocket udpSocket;
+    private final DatagramSocket udpSocket;
     /**
      * Buffer where received data is saved.
      */
@@ -101,20 +101,32 @@ class ReceiveThread extends Thread {
      * @param socket
      *            Socket to listen.
      */
-    public ReceiveThread(final GXNet parent, final java.io.Closeable socket) {
+    ReceiveThread(final GXNet parent, final java.io.Closeable socket) {
         super("GXNet " + socket.toString());
         parentMedia = parent;
         if (parent.getProtocol() == NetworkType.TCP) {
+            udpSocket = null;
             buffer = new byte[RECEIVE_BUFFER_SIZE];
             if (parent.getServer()) {
                 serverSocket = (ServerSocket) socket;
             } else {
+                serverSocket = null;
                 tcpSocket = (Socket) socket;
             }
         } else {
+            serverSocket = null;
             udpSocket = (DatagramSocket) socket;
         }
         bufferPosition = 0;
+    }
+
+    /**
+     * Gets client socket.
+     * 
+     * @return Client socket.
+     */
+    public Socket getClient() {
+        return tcpSocket;
     }
 
     /**

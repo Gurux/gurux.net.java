@@ -128,7 +128,7 @@ class GXSettings extends javax.swing.JDialog implements ActionListener {
      * @param comp
      *            Media component where settings are get and set.
      */
-    public GXSettings(final java.awt.Frame parent, final boolean modal,
+    GXSettings(final java.awt.Frame parent, final boolean modal,
             final GXNet comp) {
         super(parent, modal);
         super.setLocationRelativeTo(parent);
