@@ -34,12 +34,12 @@
 
 package gurux.net;
 
+import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 
@@ -48,7 +48,6 @@ import gurux.common.ReceiveEventArgs;
 import gurux.common.TraceEventArgs;
 import gurux.common.enums.TraceLevel;
 import gurux.common.enums.TraceTypes;
-import gurux.net.enums.NetworkType;
 
 /**
  * Receive thread listens socket and sends received data to the listeners.
@@ -59,21 +58,13 @@ import gurux.net.enums.NetworkType;
 class ReceiveThread extends Thread {
 
     /**
-     * Server socket.
+     * Socket.
      */
-    private final ServerSocket serverSocket;
+    private final Closeable socket;
     /**
      * Parent component where notifies are send.
      */
     private GXNet parentMedia;
-    /**
-     * Client TCP/IP socket to listen.
-     */
-    private Socket tcpSocket = null;
-    /**
-     * Client UDP socket.
-     */
-    private final DatagramSocket udpSocket;
     /**
      * Buffer where received data is saved.
      */
@@ -98,35 +89,15 @@ class ReceiveThread extends Thread {
      * 
      * @param parent
      *            Parent media.
-     * @param socket
+     * @param s
      *            Socket to listen.
      */
-    ReceiveThread(final GXNet parent, final java.io.Closeable socket) {
-        super("GXNet " + socket.toString());
+    ReceiveThread(final GXNet parent, final Closeable s) {
+        super("GXNet " + s.toString());
         parentMedia = parent;
-        if (parent.getProtocol() == NetworkType.TCP) {
-            udpSocket = null;
-            buffer = new byte[RECEIVE_BUFFER_SIZE];
-            if (parent.getServer()) {
-                serverSocket = (ServerSocket) socket;
-            } else {
-                serverSocket = null;
-                tcpSocket = (Socket) socket;
-            }
-        } else {
-            serverSocket = null;
-            udpSocket = (DatagramSocket) socket;
-        }
+        socket = s;
+        buffer = new byte[RECEIVE_BUFFER_SIZE];
         bufferPosition = 0;
-    }
-
-    /**
-     * Gets client socket.
-     * 
-     * @return Client socket.
-     */
-    public Socket getClient() {
-        return tcpSocket;
     }
 
     /**
@@ -143,6 +114,22 @@ class ReceiveThread extends Thread {
      */
     public final void resetBytesReceived() {
         bytesReceived = 0;
+    }
+
+    /**
+     * Wait until thread is started.
+     * 
+     * @return true, if thread started.
+     */
+    public boolean waitUntilRun() {
+        synchronized (this) {
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -241,13 +228,13 @@ class ReceiveThread extends Thread {
     /**
      * Read data from TCP/IP stream.
      * 
-     * @param socket
+     * @param s
      *            socket to read.
      * @throws IOException
      *             occurred exception.
      */
-    private void handleTCP(final Socket socket) throws IOException {
-        DataInputStream in = new DataInputStream(socket.getInputStream());
+    private void handleTCP(final Socket s) throws IOException {
+        DataInputStream in = new DataInputStream(s.getInputStream());
         int count = in.read(buffer, bufferPosition, 1);
         if (count == -1) {
             throw new SocketException();
@@ -261,12 +248,12 @@ class ReceiveThread extends Thread {
             // If buffer is full.
             if (count == buffer.length) {
                 handleReceivedData(count,
-                        socket.getRemoteSocketAddress().toString());
+                        s.getRemoteSocketAddress().toString());
                 count = 0;
                 bufferPosition = 0;
             }
         }
-        handleReceivedData(count, socket.getRemoteSocketAddress().toString());
+        handleReceivedData(count, s.getRemoteSocketAddress().toString());
     }
 
     /**
@@ -276,54 +263,39 @@ class ReceiveThread extends Thread {
      */
     @Override
     public final void run() {
-        if (serverSocket != null) {
-            while (!Thread.currentThread().isInterrupted()) {
-                try {
-                    tcpSocket = serverSocket.accept();
-                    String info =
-                            String.valueOf(tcpSocket.getRemoteSocketAddress());
-                    parentMedia.notifyClientConnected(
-                            new ConnectionEventArgs(info));
-                    while (!Thread.currentThread().isInterrupted()) {
-                        handleTCP(tcpSocket);
-                    }
-                } catch (SocketException ex) {
-                    // Client closed the connection.
-                    if (tcpSocket != null) {
-                        String info = String
-                                .valueOf(tcpSocket.getRemoteSocketAddress());
-                        tcpSocket = null;
-                        parentMedia.notifyClientDisconnected(
-                                new ConnectionEventArgs(info));
-                    }
-                    continue;
-                } catch (IOException ex) {
-                    tcpSocket = null;
-                    parentMedia
-                            .notifyError(new RuntimeException(ex.getMessage()));
-                    continue;
-                }
-            }
+        // Notify caller that thread is started.
+        synchronized (this) {
+            notifyAll();
         }
-
-        if (tcpSocket != null) {
+        // If TCP/IP
+        if (socket instanceof Socket) {
+            Socket s = (Socket) socket;
+            String info = String.valueOf(s.getRemoteSocketAddress());
             while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    handleTCP(tcpSocket);
-                } catch (IOException ex) {
+                    handleTCP(s);
+                } catch (java.net.SocketException e) {
+                    parentMedia.getTcpIpClients().remove(s);
+                    parentMedia.notifyClientDisconnected(
+                            new ConnectionEventArgs(info));
+                    break;
+                } catch (IOException e) {
                     parentMedia
-                            .notifyError(new RuntimeException(ex.getMessage()));
+                            .notifyError(new RuntimeException(e.getMessage()));
                     continue;
                 }
             }
         } else {
+            // If UDP
             DatagramPacket receivePacket =
                     new DatagramPacket(buffer, buffer.length);
             while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    udpSocket.receive(receivePacket);
+                    ((DatagramSocket) socket).receive(receivePacket);
                     handleReceivedData(receivePacket.getLength(),
                             receivePacket.getSocketAddress().toString());
+                } catch (java.net.SocketException e) {
+                    break;
                 } catch (IOException ex) {
                     parentMedia
                             .notifyError(new RuntimeException(ex.getMessage()));

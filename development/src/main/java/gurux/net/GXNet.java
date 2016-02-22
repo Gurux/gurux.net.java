@@ -89,6 +89,12 @@ public class GXNet implements IGXMedia, AutoCloseable {
      * Created socket.
      */
     private java.io.Closeable socket = null;
+
+    /**
+     * Connected TCP/IP clients.
+     */
+    private List<Socket> tcpIpClients = new ArrayList<Socket>();
+
     /**
      * Amount of sent bytes.
      */
@@ -101,10 +107,6 @@ public class GXNet implements IGXMedia, AutoCloseable {
      * Trace level.
      */
     private TraceLevel trace = TraceLevel.OFF;
-    /**
-     * Is IP6 used.
-     */
-    private boolean useIPv6;
     /**
      * Maximum client count.
      */
@@ -130,7 +132,12 @@ public class GXNet implements IGXMedia, AutoCloseable {
     /**
      * Received thread.
      */
-    private ReceiveThread receiver = null;
+    private ReceiveThread receiverThread = null;
+
+    /**
+     * Listener thread.
+     */
+    private ListenerThread listenerThread = null;
 
     /**
      * Constructor.
@@ -185,31 +192,19 @@ public class GXNet implements IGXMedia, AutoCloseable {
     }
 
     /**
+     * @return Gets connected TCP/IP clients.
+     */
+    final List<Socket> getTcpIpClients() {
+        return tcpIpClients;
+    }
+
+    /**
      * Returns synchronous class used to communicate synchronously.
      * 
      * @return Synchronous class.
      */
     final GXSynchronousMediaBase getSyncBase() {
         return syncBase;
-    }
-
-    /**
-     * Is IPv6 used. Default is False (IPv4).
-     * 
-     * @return Is IPv6 used.
-     */
-    public final boolean getUseIPv6() {
-        return useIPv6;
-    }
-
-    /**
-     * Is IPv6 used. Default is False (IPv4).
-     * 
-     * @param value
-     *            Is IPv6 used.
-     */
-    public final void setUseIPv6(final boolean value) {
-        useIPv6 = value;
     }
 
     @Override
@@ -230,9 +225,8 @@ public class GXNet implements IGXMedia, AutoCloseable {
      *            Name of changed property.
      */
     private void notifyPropertyChanged(final String info) {
-        for (IGXMediaListener listener : listeners) {
-            listener.onPropertyChanged(this,
-                    new PropertyChangedEventArgs(info));
+        for (IGXMediaListener it : listeners) {
+            it.onPropertyChanged(this, new PropertyChangedEventArgs(info));
         }
     }
 
@@ -243,12 +237,12 @@ public class GXNet implements IGXMedia, AutoCloseable {
      *            Connection events argument.
      */
     final void notifyClientConnected(final ConnectionEventArgs e) {
-        for (IGXNetListener listener : netListeners) {
-            listener.onClientConnected(this, e);
+        for (IGXNetListener it : netListeners) {
+            it.onClientConnected(this, e);
         }
         if (trace.ordinal() >= TraceLevel.INFO.ordinal()) {
-            for (IGXMediaListener listener : listeners) {
-                listener.onTrace(this, new TraceEventArgs(TraceTypes.INFO,
+            for (IGXMediaListener it : listeners) {
+                it.onTrace(this, new TraceEventArgs(TraceTypes.INFO,
                         "Client connected."));
             }
         }
@@ -262,12 +256,12 @@ public class GXNet implements IGXMedia, AutoCloseable {
      *            Connection event argument.
      */
     final void notifyClientDisconnected(final ConnectionEventArgs e) {
-        for (IGXNetListener listener : netListeners) {
-            listener.onClientDisconnected(this, e);
+        for (IGXNetListener it : netListeners) {
+            it.onClientDisconnected(this, e);
         }
         if (trace.ordinal() >= TraceLevel.INFO.ordinal()) {
-            for (IGXMediaListener listener : listeners) {
-                listener.onTrace(this, new TraceEventArgs(TraceTypes.INFO,
+            for (IGXMediaListener it : listeners) {
+                it.onTrace(this, new TraceEventArgs(TraceTypes.INFO,
                         "Client disconnected."));
             }
         }
@@ -280,11 +274,10 @@ public class GXNet implements IGXMedia, AutoCloseable {
      *            Occurred error.
      */
     final void notifyError(final RuntimeException ex) {
-        for (IGXMediaListener listener : listeners) {
-            listener.onError(this, ex);
+        for (IGXMediaListener it : listeners) {
+            it.onError(this, ex);
             if (trace.ordinal() >= TraceLevel.ERROR.ordinal()) {
-                listener.onTrace(this,
-                        new TraceEventArgs(TraceTypes.ERROR, ex));
+                it.onTrace(this, new TraceEventArgs(TraceTypes.ERROR, ex));
             }
         }
     }
@@ -296,8 +289,8 @@ public class GXNet implements IGXMedia, AutoCloseable {
      *            Received event argument.
      */
     final void notifyReceived(final ReceiveEventArgs e) {
-        for (IGXMediaListener listener : listeners) {
-            listener.onReceived(this, e);
+        for (IGXMediaListener it : listeners) {
+            it.onReceived(this, e);
         }
     }
 
@@ -308,8 +301,8 @@ public class GXNet implements IGXMedia, AutoCloseable {
      *            Trace event argument.
      */
     final void notifyTrace(final TraceEventArgs e) {
-        for (IGXMediaListener listener : listeners) {
-            listener.onTrace(this, e);
+        for (IGXMediaListener it : listeners) {
+            it.onTrace(this, e);
         }
     }
 
@@ -362,15 +355,29 @@ public class GXNet implements IGXMedia, AutoCloseable {
             throw new IllegalArgumentException(
                     "Data send failed. Invalid data.");
         }
-        if (this.getServer()) {
+        if (getServer()) {
             if (getProtocol() == NetworkType.TCP) {
-                if (receiver.getClient() != null) {
-                    receiver.getClient().getOutputStream().write(buff);
+                for (Closeable it : tcpIpClients) {
+                    if (it instanceof Socket) {
+                        if (((Socket) it).getRemoteSocketAddress().toString()
+                                .equals(target)) {
+                            ((Socket) it).getOutputStream().write(buff);
+                            break;
+                        }
+                    }
                 }
-            } else if (getProtocol() == NetworkType.UDP) {
-                InetAddress addr = InetAddress.getByName(getHostName());
-                DatagramPacket p =
-                        new DatagramPacket(buff, buff.length, addr, getPort());
+            } else {
+                String info;
+                if (target.startsWith("/")) {
+                    info = target.substring(1);
+                } else {
+                    info = target;
+                }
+
+                String[] tmp = info.split(":");
+                InetAddress addr = InetAddress.getByName(tmp[0]);
+                DatagramPacket p = new DatagramPacket(buff, buff.length, addr,
+                        Integer.parseInt(tmp[1]));
                 ((DatagramSocket) socket).send(p);
             }
         } else {
@@ -384,6 +391,7 @@ public class GXNet implements IGXMedia, AutoCloseable {
             }
         }
         this.bytesSent += buff.length;
+
     }
 
     /**
@@ -393,12 +401,11 @@ public class GXNet implements IGXMedia, AutoCloseable {
      *            New media state.
      */
     private void notifyMediaStateChange(final MediaState state) {
-        for (IGXMediaListener listener : listeners) {
+        for (IGXMediaListener it : listeners) {
             if (trace.ordinal() >= TraceLevel.ERROR.ordinal()) {
-                listener.onTrace(this,
-                        new TraceEventArgs(TraceTypes.INFO, state));
+                it.onTrace(this, new TraceEventArgs(TraceTypes.INFO, state));
             }
-            listener.onMediaStateChange(this, new MediaStateEventArgs(state));
+            it.onMediaStateChange(this, new MediaStateEventArgs(state));
         }
     }
 
@@ -421,17 +428,24 @@ public class GXNet implements IGXMedia, AutoCloseable {
             }
             notifyMediaStateChange(MediaState.OPENING);
             if (this.getServer()) {
-                if (getProtocol() == NetworkType.TCP) {
-                    socket = (Closeable) new ServerSocket(getPort());
-                } else if (getProtocol() == NetworkType.UDP) {
-                    socket = (Closeable) new DatagramSocket();
-                }
                 if (trace.ordinal() >= TraceLevel.INFO.ordinal()) {
                     notifyTrace(new TraceEventArgs(TraceTypes.INFO,
                             "Server settings: Protocol: "
                                     + this.getProtocol().toString() + " Port: "
                                     + (new Integer(getPort())).toString()));
                 }
+                if (getProtocol() == NetworkType.TCP) {
+                    socket = (Closeable) new ServerSocket(getPort());
+                    listenerThread = new ListenerThread(this, socket);
+                    listenerThread.start();
+                    listenerThread.waitUntilRun();
+                } else if (getProtocol() == NetworkType.UDP) {
+                    socket = (Closeable) new DatagramSocket(getPort());
+                    receiverThread = new ReceiveThread(this, socket);
+                    receiverThread.start();
+                    // receiverThread.waitUntilRun();
+                }
+
             } else {
                 // Create a stream-based, TCP socket using the InterNetwork
                 // Address Family.
@@ -449,9 +463,9 @@ public class GXNet implements IGXMedia, AutoCloseable {
                                     + getHostName() + " Port: "
                                     + (new Integer(getPort())).toString()));
                 }
+                receiverThread = new ReceiveThread(this, socket);
+                receiverThread.start();
             }
-            receiver = new ReceiveThread(this, socket);
-            receiver.start();
             notifyMediaStateChange(MediaState.OPEN);
         } catch (IOException e) {
             close();
@@ -462,9 +476,22 @@ public class GXNet implements IGXMedia, AutoCloseable {
     @Override
     public final void close() {
         if (socket != null) {
-            if (receiver != null) {
-                receiver.interrupt();
-                receiver = null;
+            if (getServer() && listenerThread != null) {
+                // Close all active sockets.
+                for (Closeable it : tcpIpClients) {
+                    if (it instanceof Socket) {
+                        try {
+                            it.close();
+                        } catch (IOException e) {
+                            // It's OK if this fails.
+                        }
+                    }
+                }
+                listenerThread.interrupt();
+                listenerThread = null;
+            } else if (receiverThread != null) {
+                receiverThread.interrupt();
+                receiverThread = null;
             }
             try {
                 notifyMediaStateChange(MediaState.CLOSING);
@@ -480,8 +507,8 @@ public class GXNet implements IGXMedia, AutoCloseable {
                 socket = null;
                 notifyMediaStateChange(MediaState.CLOSED);
                 bytesSent = 0;
-                if (receiver != null) {
-                    receiver.resetBytesReceived();
+                if (receiverThread != null) {
+                    receiverThread.resetBytesReceived();
                 }
                 syncBase.resetReceivedSize();
             }
@@ -620,10 +647,10 @@ public class GXNet implements IGXMedia, AutoCloseable {
      */
     @Override
     public final long getBytesReceived() {
-        if (receiver == null) {
+        if (receiverThread == null) {
             return 0;
         }
-        return receiver.getBytesReceived();
+        return receiverThread.getBytesReceived();
     }
 
     /**
@@ -635,8 +662,8 @@ public class GXNet implements IGXMedia, AutoCloseable {
     @Override
     public final void resetByteCounters() {
         bytesSent = 0;
-        if (receiver != null) {
-            receiver.resetBytesReceived();
+        if (receiverThread != null) {
+            receiverThread.resetBytesReceived();
         }
     }
 

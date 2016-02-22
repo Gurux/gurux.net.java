@@ -50,7 +50,6 @@ import gurux.common.TraceEventArgs;
 import gurux.common.enums.MediaState;
 
 /**
- *
  * Gurux network example for Java.
  */
 public class GuruxNetExampleJava extends javax.swing.JFrame
@@ -60,26 +59,26 @@ public class GuruxNetExampleJava extends javax.swing.JFrame
      */
     private static final long serialVersionUID = 1L;
     Timer StatisticTimer;
-    gurux.net.GXNet net1 = new gurux.net.GXNet();
+    gurux.net.GXNet net = new gurux.net.GXNet();
 
     /**
      * Constructor.
      */
     public GuruxNetExampleJava() {
         initComponents();
-        net1.addListener(this);
+        net.addListener(this);
         DefaultListModel<String> listModel = new DefaultListModel<>();
         ReceivedTB.setModel(listModel);
         DefaultListModel<String> m =
                 (DefaultListModel<String>) ReceivedTB.getModel();
         m.clear();
-        onMediaStateChange(net1, new MediaStateEventArgs(MediaState.CLOSED));
+        onMediaStateChange(net, new MediaStateEventArgs(MediaState.CLOSED));
     }
 
     @Override
     public void onError(Object sender, RuntimeException ex) {
         try {
-            net1.close();
+            net.close();
             JOptionPane.showMessageDialog(this, ex.getMessage());
         } catch (Exception Ex) {
             JOptionPane.showMessageDialog(this, Ex.getMessage());
@@ -102,9 +101,9 @@ public class GuruxNetExampleJava extends javax.swing.JFrame
      */
     @Override
     public void actionPerformed(ActionEvent e) {
-        this.ReceivedStat.setText(String.valueOf(net1.getBytesReceived()));
-        this.SentStat.setText(String.valueOf(net1.getBytesSent()));
-        net1.resetByteCounters();
+        this.ReceivedStat.setText(String.valueOf(net.getBytesReceived()));
+        this.SentStat.setText(String.valueOf(net.getBytesSent()));
+        net.resetByteCounters();
     }
 
     @Override
@@ -353,7 +352,7 @@ public class GuruxNetExampleJava extends javax.swing.JFrame
      */
     private void OpenBtnActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_OpenBtnActionPerformed
         try {
-            net1.open();
+            net.open();
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage());
         }
@@ -364,7 +363,7 @@ public class GuruxNetExampleJava extends javax.swing.JFrame
      */
     private void CloseBtnActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_CloseBtnActionPerformed
         try {
-            net1.close();
+            net.close();
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage());
         }
@@ -375,7 +374,7 @@ public class GuruxNetExampleJava extends javax.swing.JFrame
      */
     private void PropertiesBtnActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_PropertiesBtnActionPerformed
         try {
-            net1.properties(this);
+            net.properties(this);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage());
         }
@@ -386,7 +385,7 @@ public class GuruxNetExampleJava extends javax.swing.JFrame
      */
     private void SendBtnActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_SendBtnActionPerformed
         try {
-            net1.send(SendTB.getText(), null);
+            net.send(SendTB.getText(), null);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage());
         }
