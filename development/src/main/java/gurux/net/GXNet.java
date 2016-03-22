@@ -413,11 +413,11 @@ public class GXNet implements IGXMedia, AutoCloseable {
      * Opens the connection. Protocol, Port and HostName must be set, before
      * calling the Open method.
      * 
-     * @see port port
-     * @see hostName hostName
-     * @see protocol protocol
-     * @see server server
-     * @see close close
+     * @see #port
+     * @see #hostName
+     * @see #protocol
+     * @see #server
+     * @see #close
      */
     @Override
     public final void open() throws Exception {
@@ -547,9 +547,9 @@ public class GXNet implements IGXMedia, AutoCloseable {
      * 
      * @return The name of the host.
      * 
-     * @see open open
-     * @see port port
-     * @see protocol protocol
+     * @see #open
+     * @see #port
+     * @see #protocol
      */
     public final String getHostName() {
         return hostName;
@@ -573,9 +573,9 @@ public class GXNet implements IGXMedia, AutoCloseable {
      * 
      * @return Host or server port number.
      * 
-     * @see open open
-     * @see hostName hostName
-     * @see protocol protocol
+     * @see #open
+     * @see #hostName
+     * @see #protocol
      */
     public final int getPort() {
         return port;
@@ -586,9 +586,9 @@ public class GXNet implements IGXMedia, AutoCloseable {
      * 
      * @param value
      *            Host or server port number
-     * @see open open
-     * @see hostName hostName
-     * @see protocol protocol
+     * @see #open
+     * @see #hostName
+     * @see #protocol
      */
     public final void setPort(final int value) {
         if (port != value) {
@@ -601,7 +601,7 @@ public class GXNet implements IGXMedia, AutoCloseable {
      * 
      * Is server mode used.
      * 
-     * @see open open
+     * @see #open
      * @return Is server mode used.
      */
     public final boolean getServer() {
@@ -614,7 +614,7 @@ public class GXNet implements IGXMedia, AutoCloseable {
      * 
      * @param value
      *            Is server mode used.
-     * @see open open
+     * @see #open
      */
     public final void setServer(final boolean value) {
         if (server != value) {
@@ -631,8 +631,8 @@ public class GXNet implements IGXMedia, AutoCloseable {
     /**
      * Sent byte count.
      * 
-     * @see getBytesReceived getBytesReceived
-     * @see resetByteCounters resetByteCounters
+     * @see #getBytesReceived
+     * @see #resetByteCounters
      */
     @Override
     public final long getBytesSent() {
@@ -642,8 +642,8 @@ public class GXNet implements IGXMedia, AutoCloseable {
     /**
      * Received byte count.
      * 
-     * @see bytesSent bytesSent
-     * @see resetByteCounters resetByteCounters
+     * @see #bytesSent
+     * @see #resetByteCounters
      */
     @Override
     public final long getBytesReceived() {
@@ -656,8 +656,8 @@ public class GXNet implements IGXMedia, AutoCloseable {
     /**
      * Resets BytesReceived and BytesSent counters.
      * 
-     * @see bytesSent bytesSent
-     * @see getBytesReceived getBytesReceived
+     * @see #bytesSent
+     * @see #getBytesReceived
      */
     @Override
     public final void resetByteCounters() {

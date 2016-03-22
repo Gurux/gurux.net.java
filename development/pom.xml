@@ -2,7 +2,7 @@
  <modelVersion>4.0.0</modelVersion>
  <groupId>org.gurux</groupId>
  <artifactId>gurux.net</artifactId>
- <version>1.0.6</version>
+ <version>1.0.8</version>
  <packaging>jar</packaging>  
  <name>gurux.net.java</name>
  <url>http://www.gurux.org</url>
@@ -68,6 +68,14 @@
 			</execution>
 		</executions>
 	   </plugin>
+    </plugins>
+  </build>
+
+ <profiles>
+  <profile> 
+    <id>release</id>
+    <build>
+      <plugins>
 	    <!-- Generate java doc. -->
        <plugin>
        <groupId>org.apache.maven.plugins</groupId>
@@ -109,8 +117,10 @@
             <autoReleaseAfterClose>true</autoReleaseAfterClose>
          </configuration>
        </plugin>
-    </plugins>
-  </build>
+      </plugins>
+    </build>
+  </profile>
+</profiles>
   
 <dependencies>
   <dependency>
