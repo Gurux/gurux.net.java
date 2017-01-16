@@ -2,7 +2,7 @@
  <modelVersion>4.0.0</modelVersion>
  <groupId>org.gurux</groupId>
  <artifactId>gurux.net</artifactId>
- <version>1.0.9</version>
+ <version>1.0.10</version>
  <packaging>jar</packaging>  
  <name>gurux.net.java</name>
  <url>http://www.gurux.org</url>
@@ -55,28 +55,20 @@
         </configuration>
       </plugin>
       <!-- Generate sources. -->
-      <plugin>
-		<groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-source-plugin</artifactId>
-		<version>2.4</version>
-		<executions>
-			<execution>
-				<id>attach-sources</id>
-				<goals>
-					<goal>jar</goal>
-				</goals>
-			</execution>
-		</executions>
-	   </plugin>
-    </plugins>
-  </build>
-
- <profiles>
-  <profile> 
-    <id>release</id>
-    <build>
-      <plugins>
-	    <!-- Generate java doc. -->
+        <plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-source-plugin</artifactId>
+	  <version>2.4</version>
+	  <executions>
+	    <execution>
+	      <id>attach-sources</id>
+	      <goals>
+	      <goal>jar</goal>
+	      </goals>
+	    </execution>
+	  </executions>
+       </plugin>
+       <!-- Generate java doc. -->
        <plugin>
        <groupId>org.apache.maven.plugins</groupId>
          <artifactId>maven-javadoc-plugin</artifactId>
@@ -90,6 +82,14 @@
            </execution>
          </executions>
        </plugin>
+    </plugins>
+  </build>
+
+ <profiles>
+  <profile> 
+    <id>release</id>
+    <build>
+      <plugins>
        <!--  Sign the component. -->
        <plugin>
          <groupId>org.apache.maven.plugins</groupId>

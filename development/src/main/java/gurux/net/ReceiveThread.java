@@ -69,10 +69,6 @@ class ReceiveThread extends Thread {
      * Buffer where received data is saved.
      */
     private byte[] buffer = null;
-    /**
-     * Buffer position.
-     */
-    private int bufferPosition = 0;
 
     /**
      * Amount of received bytes.
@@ -97,7 +93,6 @@ class ReceiveThread extends Thread {
         parentMedia = parent;
         socket = s;
         buffer = new byte[RECEIVE_BUFFER_SIZE];
-        bufferPosition = 0;
     }
 
     /**
@@ -150,23 +145,22 @@ class ReceiveThread extends Thread {
         if (parentMedia.getIsSynchronous()) {
             TraceEventArgs arg = null;
             synchronized (parentMedia.getSyncBase().getSync()) {
-                parentMedia.getSyncBase().appendData(buffer, bufferPosition,
-                        length);
+                parentMedia.getSyncBase().appendData(buffer, 0, length);
                 // Search end of packet if it is given.
                 if (eop != null) {
                     if (eop instanceof Array) {
                         for (Object it : (Object[]) eop) {
                             totalCount = GXSynchronousMediaBase.indexOf(buffer,
                                     GXSynchronousMediaBase.getAsByteArray(it),
-                                    bufferPosition - length, bufferPosition);
+                                    0, length);
                             if (totalCount != -1) {
                                 break;
                             }
                         }
                     } else {
                         totalCount = GXSynchronousMediaBase.indexOf(buffer,
-                                GXSynchronousMediaBase.getAsByteArray(eop),
-                                bufferPosition - length, bufferPosition);
+                                GXSynchronousMediaBase.getAsByteArray(eop), 0,
+                                length);
                     }
                 }
                 if (totalCount != -1) {
@@ -182,46 +176,14 @@ class ReceiveThread extends Thread {
             }
         } else {
             parentMedia.getSyncBase().resetReceivedSize();
-            // Search end of packet if it is given.
-            if (eop != null) {
-                if (eop instanceof Array) {
-                    for (Object it : (Object[]) eop) {
-
-                        totalCount = GXSynchronousMediaBase.indexOf(buffer,
-                                GXSynchronousMediaBase.getAsByteArray(it),
-                                bufferPosition - length, bufferPosition);
-                        if (totalCount != -1) {
-                            break;
-                        }
-                    }
-                } else {
-                    totalCount = GXSynchronousMediaBase.indexOf(buffer,
-                            GXSynchronousMediaBase.getAsByteArray(eop),
-                            bufferPosition - length, bufferPosition);
-                }
-                if (totalCount != -1) {
-                    byte[] data = new byte[length];
-                    System.arraycopy(buffer, 0, data, 0, totalCount);
-                    System.arraycopy(buffer, 0, buffer, totalCount,
-                            bufferPosition - totalCount);
-                    bufferPosition = 0;
-                    ReceiveEventArgs e = new ReceiveEventArgs(data, info);
-                    parentMedia.notifyReceived(e);
-                    if (parentMedia.getTrace() == TraceLevel.VERBOSE) {
-                        parentMedia.notifyTrace(new gurux.common.TraceEventArgs(
-                                TraceTypes.RECEIVED, buffer, 0, length));
-                    }
-                }
-            } else {
-                byte[] data = new byte[length];
-                System.arraycopy(buffer, 0, data, 0, length);
-                if (parentMedia.getTrace() == TraceLevel.VERBOSE) {
-                    parentMedia.notifyTrace(new gurux.common.TraceEventArgs(
-                            TraceTypes.RECEIVED, data));
-                }
-                ReceiveEventArgs e = new ReceiveEventArgs(data, info);
-                parentMedia.notifyReceived(e);
+            byte[] data = new byte[length];
+            System.arraycopy(buffer, 0, data, 0, length);
+            if (parentMedia.getTrace() == TraceLevel.VERBOSE) {
+                parentMedia.notifyTrace(new gurux.common.TraceEventArgs(
+                        TraceTypes.RECEIVED, data));
             }
+            ReceiveEventArgs e = new ReceiveEventArgs(data, info);
+            parentMedia.notifyReceived(e);
         }
     }
 
@@ -235,22 +197,21 @@ class ReceiveThread extends Thread {
      */
     private void handleTCP(final Socket s) throws IOException {
         DataInputStream in = new DataInputStream(s.getInputStream());
-        int count = in.read(buffer, bufferPosition, 1);
+        int count = in.read(buffer, 0, 1);
         if (count == -1) {
             throw new SocketException();
         }
         while (in.available() != 0) {
             int cnt = in.available();
-            if (bufferPosition + cnt > buffer.length) {
-                cnt = buffer.length - bufferPosition - count;
+            if (count + cnt > buffer.length) {
+                cnt = buffer.length - count;
             }
-            count += in.read(buffer, bufferPosition + count, cnt);
+            count += in.read(buffer, count, cnt);
             // If buffer is full.
             if (count == buffer.length) {
                 handleReceivedData(count,
                         s.getRemoteSocketAddress().toString());
                 count = 0;
-                bufferPosition = 0;
             }
         }
         handleReceivedData(count, s.getRemoteSocketAddress().toString());
