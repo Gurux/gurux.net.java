@@ -36,6 +36,7 @@ package gurux.net;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -43,6 +44,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import gurux.common.GXSync;
 import gurux.common.GXSynchronousMediaBase;
@@ -691,13 +700,89 @@ public class GXNet implements IGXMedia, AutoCloseable {
      */
     @Override
     public final String getSettings() {
-        // TODO:
-        return null;
+        StringBuilder sb = new StringBuilder();
+        String nl = System.getProperty("line.separator");
+        if (server) {
+            sb.append("<Server>");
+            if (server) {
+                sb.append("1");
+            } else {
+                sb.append("0");
+            }
+            sb.append("</Server>");
+            sb.append(nl);
+        }
+        if (hostName != null && !hostName.isEmpty()) {
+            sb.append("<IP>");
+            sb.append(hostName);
+            sb.append("</IP>");
+            sb.append(nl);
+        }
+        if (port != 0) {
+            sb.append("<Port>");
+            sb.append(String.valueOf(port));
+            sb.append("</Port>");
+            sb.append(nl);
+        }
+        if (protocol != NetworkType.TCP) {
+            sb.append("<Protocol>");
+            sb.append(protocol.ordinal());
+            sb.append("</Protocol>");
+            sb.append(nl);
+        }
+        return sb.toString();
     }
 
     @Override
     public final void setSettings(final String value) {
-        // TODO:
+        if (value != null && !value.isEmpty()) {
+            try {
+                DocumentBuilderFactory factory =
+                        DocumentBuilderFactory.newInstance();
+                DocumentBuilder builder = factory.newDocumentBuilder();
+                StringBuilder sb = new StringBuilder();
+                if (value.startsWith("<?xml version=\"1.0\"?>")) {
+                    sb.append(value);
+                } else {
+                    String nl = System.getProperty("line.separator");
+                    sb.append("<?xml version=\"1.0\"?>\r\n");
+                    sb.append(nl);
+                    sb.append("<Net>");
+                    sb.append(value);
+                    sb.append(nl);
+                    sb.append("</Net>");
+                }
+                InputSource is =
+                        new InputSource(new StringReader(sb.toString()));
+                Document doc = builder.parse(is);
+                doc.getDocumentElement().normalize();
+                NodeList nList = doc.getChildNodes();
+                if (nList.getLength() != 1) {
+                    throw new IllegalArgumentException(
+                            "Invalid XML root node.");
+                }
+                nList = nList.item(0).getChildNodes();
+                for (int pos = 0; pos < nList.getLength(); ++pos) {
+                    Node it = nList.item(pos);
+                    if (it.getNodeType() == Node.ELEMENT_NODE) {
+                        if ("Server".equalsIgnoreCase(it.getNodeName())) {
+                            setServer(true);
+                        } else if ("IP".equalsIgnoreCase(it.getNodeName())) {
+                            setHostName(it.getFirstChild().getNodeValue());
+                        } else if ("Port".equalsIgnoreCase(it.getNodeName())) {
+                            setPort(Integer.parseInt(
+                                    it.getFirstChild().getNodeValue()));
+                        } else if ("Protocol"
+                                .equalsIgnoreCase(it.getNodeName())) {
+                            setProtocol(NetworkType.values()[Integer.parseInt(
+                                    it.getFirstChild().getNodeValue())]);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        }
     }
 
     @Override

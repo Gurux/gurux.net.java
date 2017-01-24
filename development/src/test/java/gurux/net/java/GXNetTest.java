@@ -142,4 +142,21 @@ public class GXNetTest implements IGXMediaListener, IGXNetListener {
             final PropertyChangedEventArgs e) {
         // TODO Auto-generated method stub
     }
+
+    /**
+     * Settings test.
+     * 
+     */
+    @Test
+    public final void settingsTest() {
+        String nl = System.getProperty("line.separator");
+        try (GXNet client = new GXNet(NetworkType.UDP, "localhost", UDP_PORT)) {
+
+            String expected = "<IP>localhost</IP>" + nl + "<Port>1002</Port>"
+                    + nl + "<Protocol>0</Protocol>" + nl;
+            String actual = client.getSettings();
+            assertEquals(expected, actual);
+            client.setSettings(actual);
+        }
+    }
 }
