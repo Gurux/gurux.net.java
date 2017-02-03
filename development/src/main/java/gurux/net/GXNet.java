@@ -735,6 +735,11 @@ public class GXNet implements IGXMedia, AutoCloseable {
 
     @Override
     public final void setSettings(final String value) {
+        // Reset to default values.
+        server = false;
+        hostName = "";
+        port = 0;
+        protocol = NetworkType.TCP;
         if (value != null && !value.isEmpty()) {
             try {
                 DocumentBuilderFactory factory =

@@ -220,7 +220,6 @@ class ReceiveThread extends Thread {
     /**
      * Receive data from the server using the established socket connection.
      * 
-     * @return The data received from the server
      */
     @Override
     public final void run() {

@@ -48,7 +48,7 @@ public interface IGXNetListener {
      * @param e
      *            Event arguments.
      */
-    void onClientConnected(final Object sender, final ConnectionEventArgs e);
+    void onClientConnected(Object sender, ConnectionEventArgs e);
 
     /**
      * Called when the client has been disconnected from the GXNet server.
@@ -58,5 +58,5 @@ public interface IGXNetListener {
      * @param e
      *            Event arguments.
      */
-    void onClientDisconnected(final Object sender, final ConnectionEventArgs e);
+    void onClientDisconnected(Object sender, ConnectionEventArgs e);
 }
