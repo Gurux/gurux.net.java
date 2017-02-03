@@ -236,7 +236,9 @@ class ReceiveThread extends Thread {
                     handleTCP(s);
                 } catch (java.net.SocketException e) {
                     // Client has close the connection.
-                    parentMedia.getTcpIpClients().remove(s);
+                    synchronized (parentMedia.getTcpIpClients()) {
+                        parentMedia.getTcpIpClients().remove(s);
+                    }
                     parentMedia.notifyClientDisconnected(
                             new ConnectionEventArgs(info));
                     try {

@@ -103,7 +103,9 @@ class ListenerThread extends Thread {
                 ReceiveThread receiver = new ReceiveThread(parentMedia,
                         (java.io.Closeable) socket);
                 receiver.start();
-                parentMedia.getTcpIpClients().add(socket);
+                synchronized (parentMedia.getTcpIpClients()) {
+                    parentMedia.getTcpIpClients().add(socket);
+                }
                 String info = String.valueOf(socket.getRemoteSocketAddress());
                 parentMedia
                         .notifyClientConnected(new ConnectionEventArgs(info));

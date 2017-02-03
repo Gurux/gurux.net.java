@@ -366,12 +366,14 @@ public class GXNet implements IGXMedia, AutoCloseable {
         }
         if (getServer()) {
             if (getProtocol() == NetworkType.TCP) {
-                for (Closeable it : tcpIpClients) {
-                    if (it instanceof Socket) {
-                        if (((Socket) it).getRemoteSocketAddress().toString()
-                                .equals(target)) {
-                            ((Socket) it).getOutputStream().write(buff);
-                            break;
+                synchronized (tcpIpClients) {
+                    for (Closeable it : tcpIpClients) {
+                        if (it instanceof Socket) {
+                            if (((Socket) it).getRemoteSocketAddress()
+                                    .toString().equals(target)) {
+                                ((Socket) it).getOutputStream().write(buff);
+                                break;
+                            }
                         }
                     }
                 }
@@ -487,12 +489,14 @@ public class GXNet implements IGXMedia, AutoCloseable {
         if (socket != null) {
             if (getServer() && listenerThread != null) {
                 // Close all active sockets.
-                for (Closeable it : tcpIpClients) {
-                    if (it instanceof Socket) {
-                        try {
-                            it.close();
-                        } catch (IOException e) {
-                            // It's OK if this fails.
+                synchronized (tcpIpClients) {
+                    for (Closeable it : tcpIpClients) {
+                        if (it instanceof Socket) {
+                            try {
+                                it.close();
+                            } catch (IOException e) {
+                                // It's OK if this fails.
+                            }
                         }
                     }
                 }
