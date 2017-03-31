@@ -43,6 +43,7 @@ import java.net.DatagramSocket;
 import java.net.Socket;
 import java.net.SocketException;
 
+import gurux.common.AutoResetEvent;
 import gurux.common.GXSynchronousMediaBase;
 import gurux.common.ReceiveEventArgs;
 import gurux.common.TraceEventArgs;
@@ -57,6 +58,10 @@ import gurux.common.enums.TraceTypes;
  */
 class ReceiveThread extends Thread {
 
+    /**
+     * Is thread started.
+     */
+    private AutoResetEvent started = new AutoResetEvent(false);
     /**
      * Socket.
      */
@@ -117,14 +122,7 @@ class ReceiveThread extends Thread {
      * @return true, if thread started.
      */
     public boolean waitUntilRun() {
-        synchronized (this) {
-            try {
-                this.wait();
-            } catch (InterruptedException e) {
-                return false;
-            }
-        }
-        return true;
+        return started.waitOne();
     }
 
     /**
@@ -224,9 +222,7 @@ class ReceiveThread extends Thread {
     @Override
     public final void run() {
         // Notify caller that thread is started.
-        synchronized (this) {
-            notifyAll();
-        }
+        started.set();
         // If TCP/IP
         if (socket instanceof Socket) {
             Socket s = (Socket) socket;

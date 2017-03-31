@@ -190,6 +190,50 @@ public class GXNet implements IGXMedia, AutoCloseable {
     }
 
     /**
+     * 
+     * Attach TCP/IP connection.
+     * 
+     * 
+     * This can be used in server side if server want to start communicating
+     * with client using synchronous communication. Close connection after use.
+     * 
+     * @param address
+     *            cliend address to connect.
+     * @return Attached connection.
+     */
+    public final GXNet attach(final String address) {
+        if (protocol != NetworkType.TCP) {
+            throw new IllegalArgumentException(
+                    "Attach can be used only with TCP/IP connection.");
+        }
+        GXNet net = new GXNet();
+        net.setConfigurableSettings(configurableSettings);
+        net.setProtocol(protocol);
+        net.setTrace(trace);
+        synchronized (tcpIpClients) {
+            for (Closeable it : tcpIpClients) {
+                if (it instanceof Socket) {
+                    Socket s = (Socket) it;
+                    if (s.getRemoteSocketAddress().toString().equals(address)) {
+                        net.socket = s;
+                        net.hostName = hostName;
+                        net.port = port;
+                        tcpIpClients.remove(s);
+                        net.receiverThread =
+                                new ReceiveThread(net, (java.io.Closeable) s);
+                        net.receiverThread.start();
+                        break;
+                    }
+                }
+            }
+        }
+        if (net.socket == null) {
+            throw new IllegalArgumentException("Unknown address.");
+        }
+        return net;
+    }
+
+    /**
      * Destructor.
      */
     @Override
@@ -454,7 +498,7 @@ public class GXNet implements IGXMedia, AutoCloseable {
                     socket = (Closeable) new DatagramSocket(getPort());
                     receiverThread = new ReceiveThread(this, socket);
                     receiverThread.start();
-                    // receiverThread.waitUntilRun();
+                    receiverThread.waitUntilRun();
                 }
 
             } else {
@@ -476,6 +520,7 @@ public class GXNet implements IGXMedia, AutoCloseable {
                 }
                 receiverThread = new ReceiveThread(this, socket);
                 receiverThread.start();
+                receiverThread.waitUntilRun();
             }
             notifyMediaStateChange(MediaState.OPEN);
         } catch (IOException e) {

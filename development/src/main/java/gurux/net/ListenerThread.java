@@ -38,6 +38,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import gurux.common.AutoResetEvent;
+
 /**
  * Receive thread listens socket and sends received data to the listeners.
  * 
@@ -46,6 +48,10 @@ import java.net.Socket;
  */
 class ListenerThread extends Thread {
 
+    /**
+     * Is thread started.
+     */
+    private AutoResetEvent started = new AutoResetEvent(false);
     /**
      * Server socket.
      */
@@ -75,14 +81,7 @@ class ListenerThread extends Thread {
      * @return true, if thread started.
      */
     public boolean waitUntilRun() {
-        synchronized (this) {
-            try {
-                this.wait();
-            } catch (InterruptedException e) {
-                return false;
-            }
-        }
-        return true;
+        return started.waitOne();
     }
 
     /**
@@ -92,23 +91,35 @@ class ListenerThread extends Thread {
     @Override
     public final void run() {
         // Notify caller that thread is started.
-        synchronized (this) {
-            notifyAll();
-        }
+        started.set();
         Socket socket;
         while (!Thread.currentThread().isInterrupted()) {
             try {
                 socket = null;
                 socket = serverSocket.accept();
-                ReceiveThread receiver = new ReceiveThread(parentMedia,
-                        (java.io.Closeable) socket);
-                receiver.start();
                 synchronized (parentMedia.getTcpIpClients()) {
                     parentMedia.getTcpIpClients().add(socket);
                 }
-                String info = String.valueOf(socket.getRemoteSocketAddress());
-                parentMedia
-                        .notifyClientConnected(new ConnectionEventArgs(info));
+                ConnectionEventArgs c = new ConnectionEventArgs(
+                        String.valueOf(socket.getRemoteSocketAddress()));
+                parentMedia.notifyClientConnected(c);
+                if (!c.getAccept()) {
+                    synchronized (parentMedia.getTcpIpClients()) {
+                        parentMedia.getTcpIpClients().remove(socket);
+                    }
+                    socket.close();
+                } else {
+                    // Check that media is not attached.
+                    boolean exist;
+                    synchronized (parentMedia.getTcpIpClients()) {
+                        exist = parentMedia.getTcpIpClients().contains(socket);
+                    }
+                    if (exist) {
+                        ReceiveThread receiver = new ReceiveThread(parentMedia,
+                                (java.io.Closeable) socket);
+                        receiver.start();
+                    }
+                }
             } catch (IOException ex) {
                 // If connection is not closed.
                 if (!Thread.currentThread().isInterrupted()) {
