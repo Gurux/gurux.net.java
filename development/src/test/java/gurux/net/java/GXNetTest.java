@@ -107,8 +107,8 @@ public class GXNetTest implements IGXMediaListener, IGXNetListener {
     }
 
     @Override
-    public final void onError(final Object sender, final RuntimeException ex) {
-        throw ex;
+    public final void onError(final Object sender, final Exception ex) {
+        throw new RuntimeException(ex.getMessage());
     }
 
     /**

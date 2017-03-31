@@ -290,16 +290,17 @@ public class GXNet implements IGXMedia, AutoCloseable {
      *            Connection events argument.
      */
     final void notifyClientConnected(final ConnectionEventArgs e) {
-        for (IGXNetListener it : netListeners) {
-            it.onClientConnected(this, e);
-        }
-        if (trace.ordinal() >= TraceLevel.INFO.ordinal()) {
-            for (IGXMediaListener it : listeners) {
-                it.onTrace(this, new TraceEventArgs(TraceTypes.INFO,
-                        "Client connected."));
+        synchronized (netListeners) {
+            for (IGXNetListener it : netListeners) {
+                it.onClientConnected(this, e);
+            }
+            if (trace.ordinal() >= TraceLevel.INFO.ordinal()) {
+                for (IGXMediaListener it : listeners) {
+                    it.onTrace(this, new TraceEventArgs(TraceTypes.INFO,
+                            "Client connected."));
+                }
             }
         }
-
     }
 
     /**
@@ -309,13 +310,15 @@ public class GXNet implements IGXMedia, AutoCloseable {
      *            Connection event argument.
      */
     final void notifyClientDisconnected(final ConnectionEventArgs e) {
-        for (IGXNetListener it : netListeners) {
-            it.onClientDisconnected(this, e);
-        }
-        if (trace.ordinal() >= TraceLevel.INFO.ordinal()) {
-            for (IGXMediaListener it : listeners) {
-                it.onTrace(this, new TraceEventArgs(TraceTypes.INFO,
-                        "Client disconnected."));
+        synchronized (netListeners) {
+            for (IGXNetListener it : netListeners) {
+                it.onClientDisconnected(this, e);
+            }
+            if (trace.ordinal() >= TraceLevel.INFO.ordinal()) {
+                for (IGXMediaListener it : listeners) {
+                    it.onTrace(this, new TraceEventArgs(TraceTypes.INFO,
+                            "Client disconnected."));
+                }
             }
         }
     }
@@ -455,7 +458,7 @@ public class GXNet implements IGXMedia, AutoCloseable {
      * @param state
      *            New media state.
      */
-    private void notifyMediaStateChange(final MediaState state) {
+    void notifyMediaStateChange(final MediaState state) {
         for (IGXMediaListener it : listeners) {
             if (trace.ordinal() >= TraceLevel.ERROR.ordinal()) {
                 it.onTrace(this, new TraceEventArgs(TraceTypes.INFO, state));
@@ -910,17 +913,21 @@ public class GXNet implements IGXMedia, AutoCloseable {
 
     @Override
     public final void addListener(final IGXMediaListener listener) {
-        listeners.add(listener);
-        if (listener instanceof IGXNetListener) {
-            netListeners.add((IGXNetListener) listener);
+        synchronized (netListeners) {
+            listeners.add(listener);
+            if (listener instanceof IGXNetListener) {
+                netListeners.add((IGXNetListener) listener);
+            }
         }
     }
 
     @Override
     public final void removeListener(final IGXMediaListener listener) {
-        listeners.remove(listener);
-        if (listener instanceof IGXNetListener) {
-            netListeners.remove((IGXNetListener) listener);
+        synchronized (netListeners) {
+            listeners.remove(listener);
+            if (listener instanceof IGXNetListener) {
+                netListeners.remove((IGXNetListener) listener);
+            }
         }
     }
 }

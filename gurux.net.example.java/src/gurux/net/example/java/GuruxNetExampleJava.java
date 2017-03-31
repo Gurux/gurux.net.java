@@ -76,7 +76,7 @@ public class GuruxNetExampleJava extends javax.swing.JFrame
     }
 
     @Override
-    public void onError(Object sender, RuntimeException ex) {
+    public void onError(Object sender, Exception ex) {
         try {
             net.close();
             JOptionPane.showMessageDialog(this, ex.getMessage());
@@ -231,8 +231,9 @@ public class GuruxNetExampleJava extends javax.swing.JFrame
         layout.setHorizontalGroup(layout
                 .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(layout.createSequentialGroup().addContainerGap()
-                        .addGroup(layout.createParallelGroup(
-                                javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout
+                                .createParallelGroup(
+                                        javax.swing.GroupLayout.Alignment.LEADING)
                                 .addGroup(layout.createSequentialGroup()
                                         .addComponent(jLabel1)
                                         .addPreferredGap(
@@ -240,8 +241,8 @@ public class GuruxNetExampleJava extends javax.swing.JFrame
                                                 javax.swing.GroupLayout.DEFAULT_SIZE,
                                                 Short.MAX_VALUE)
                                         .addComponent(SendBtn))
-                                .addGroup(layout.createSequentialGroup()
-                                        .addGroup(layout
+                                .addGroup(layout
+                                        .createSequentialGroup().addGroup(layout
                                                 .createParallelGroup(
                                                         javax.swing.GroupLayout.Alignment.TRAILING)
                                                 .addGroup(layout

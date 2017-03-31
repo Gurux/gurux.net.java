@@ -107,6 +107,8 @@ class ListenerThread extends Thread {
                     synchronized (parentMedia.getTcpIpClients()) {
                         parentMedia.getTcpIpClients().remove(socket);
                     }
+                    socket.sendUrgentData(0);
+                    socket.shutdownInput();
                     socket.close();
                 } else {
                     // Check that media is not attached.
