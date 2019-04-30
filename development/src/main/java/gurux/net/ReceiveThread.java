@@ -192,13 +192,16 @@ class ReceiveThread extends Thread {
      *            socket to read.
      * @throws IOException
      *             occurred exception.
+     * @throws InterruptedException
      */
-    private void handleTCP(final Socket s) throws IOException {
+    private void handleTCP(final Socket s)
+            throws IOException, InterruptedException {
         DataInputStream in = new DataInputStream(s.getInputStream());
         int count = in.read(buffer, 0, 1);
         if (count == -1) {
             throw new SocketException();
         }
+        Thread.sleep(parentMedia.getReceiveDelay());
         while (in.available() != 0) {
             int cnt = in.available();
             if (count + cnt > buffer.length) {
@@ -254,6 +257,8 @@ class ReceiveThread extends Thread {
                 } catch (IOException e) {
                     parentMedia
                             .notifyError(new RuntimeException(e.getMessage()));
+                    break;
+                } catch (InterruptedException e) {
                     break;
                 }
             }

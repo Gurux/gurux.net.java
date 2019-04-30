@@ -55,7 +55,7 @@ import org.xml.sax.InputSource;
 
 import gurux.common.GXSync;
 import gurux.common.GXSynchronousMediaBase;
-import gurux.common.IGXMedia;
+import gurux.common.IGXMedia2;
 import gurux.common.IGXMediaListener;
 import gurux.common.MediaStateEventArgs;
 import gurux.common.PropertyChangedEventArgs;
@@ -73,7 +73,10 @@ import gurux.net.enums.NetworkType;
  * using Internet.
  * 
  */
-public class GXNet implements IGXMedia, AutoCloseable {
+public class GXNet implements IGXMedia2, AutoCloseable {
+    private int receiveDelay;
+
+    private int asyncWaitTime;
     /**
      * Used protocol.
      */
@@ -929,5 +932,30 @@ public class GXNet implements IGXMedia, AutoCloseable {
                 netListeners.remove((IGXNetListener) listener);
             }
         }
+    }
+
+    @Override
+    public int getReceiveDelay() {
+        return receiveDelay;
+    }
+
+    @Override
+    public void setReceiveDelay(final int value) {
+        receiveDelay = value;
+    }
+
+    @Override
+    public int getAsyncWaitTime() {
+        return asyncWaitTime;
+    }
+
+    @Override
+    public void setAsyncWaitTime(final int value) {
+        asyncWaitTime = value;
+    }
+
+    @Override
+    public Object getAsyncWaitHandle() {
+        return null;
     }
 }
