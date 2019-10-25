@@ -493,15 +493,15 @@ public class GXNet implements IGXMedia2, AutoCloseable {
                     notifyTrace(new TraceEventArgs(TraceTypes.INFO,
                             "Server settings: Protocol: "
                                     + this.getProtocol().toString() + " Port: "
-                                    + (new Integer(getPort())).toString()));
+                                    + String.valueOf(getPort())));
                 }
                 if (getProtocol() == NetworkType.TCP) {
-                    socket = (Closeable) new ServerSocket(getPort());
+                    socket = new ServerSocket(getPort());
                     listenerThread = new ListenerThread(this, socket);
                     listenerThread.start();
                     listenerThread.waitUntilRun();
                 } else if (getProtocol() == NetworkType.UDP) {
-                    socket = (Closeable) new DatagramSocket(getPort());
+                    socket = new DatagramSocket(getPort());
                     receiverThread = new ReceiveThread(this, socket);
                     receiverThread.start();
                     receiverThread.waitUntilRun();
@@ -522,7 +522,7 @@ public class GXNet implements IGXMedia2, AutoCloseable {
                             "Client settings: Protocol: "
                                     + this.getProtocol().toString() + " Host: "
                                     + getHostName() + " Port: "
-                                    + (new Integer(getPort())).toString()));
+                                    + String.valueOf(getPort())));
                 }
                 receiverThread = new ReceiveThread(this, socket);
                 receiverThread.start();
