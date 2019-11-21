@@ -511,9 +511,9 @@ public class GXNet implements IGXMedia2, AutoCloseable {
                 // Create a stream-based, TCP socket using the InterNetwork
                 // Address Family.
                 if (getProtocol() == NetworkType.TCP) {
-                    socket = (Closeable) new Socket(getHostName(), getPort());
+                    socket = new Socket(getHostName(), getPort());
                 } else if (getProtocol() == NetworkType.UDP) {
-                    socket = (Closeable) new DatagramSocket();
+                    socket = new DatagramSocket();
                 } else {
                     throw new IllegalArgumentException("Protocol");
                 }

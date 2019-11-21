@@ -25,7 +25,8 @@
       </properties>
     </developer>
   </developers>
-  <properties>
+ <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
   </properties>

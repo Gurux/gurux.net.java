@@ -248,15 +248,18 @@ class ReceiveThread extends Thread {
                         }
                     } else {
                         // If client.
-                        parentMedia.notifyError(
-                                new RuntimeException(e.getMessage()));
-                        parentMedia.close();
-
+                        if (!Thread.currentThread().isInterrupted()) {
+                            parentMedia.notifyError(
+                                    new RuntimeException(e.getMessage()));
+                            parentMedia.close();
+                        }
                     }
                     break;
                 } catch (IOException e) {
-                    parentMedia
-                            .notifyError(new RuntimeException(e.getMessage()));
+                    if (!Thread.currentThread().isInterrupted()) {
+                        parentMedia.notifyError(
+                                new RuntimeException(e.getMessage()));
+                    }
                     break;
                 } catch (InterruptedException e) {
                     break;
@@ -274,9 +277,10 @@ class ReceiveThread extends Thread {
                 } catch (java.net.SocketException e) {
                     break;
                 } catch (IOException ex) {
-                    parentMedia
-                            .notifyError(new RuntimeException(ex.getMessage()));
-                    continue;
+                    if (!Thread.currentThread().isInterrupted()) {
+                        parentMedia.notifyError(
+                                new RuntimeException(ex.getMessage()));
+                    }
                 }
             }
         }
