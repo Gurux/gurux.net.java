@@ -32,15 +32,22 @@
 
 package gurux.net;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JRootPane;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.LayoutStyle.ComponentPlacement;
 
 import gurux.net.enums.NetworkType;
 
@@ -117,6 +124,7 @@ class GXSettings extends javax.swing.JDialog implements ActionListener {
      * Main panel.
      */
     private javax.swing.JPanel jPanel1;
+    private JTextField WaittimeTB;
 
     /**
      * Creates new form GXSettings.
@@ -141,6 +149,7 @@ class GXSettings extends javax.swing.JDialog implements ActionListener {
         portTB.setText(String.valueOf(target.getPort()));
         this.serverCB.setSelected(target.getServer());
         this.protocol.setSelectedItem(getProtocol(target.getProtocol()));
+        WaittimeTB.setText(String.valueOf(target.getConnectionWaitTime()));
     }
 
     /**
@@ -266,9 +275,8 @@ class GXSettings extends javax.swing.JDialog implements ActionListener {
                                 .addContainerGap(
                                         javax.swing.GroupLayout.DEFAULT_SIZE,
                                         Short.MAX_VALUE)
-                                .addGroup(portPanelLayout
-                                        .createParallelGroup(
-                                                javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addGroup(portPanelLayout.createParallelGroup(
+                                        javax.swing.GroupLayout.Alignment.BASELINE)
                                         .addComponent(portLbl)
                                         .addComponent(portTB,
                                                 javax.swing.GroupLayout.PREFERRED_SIZE,
@@ -337,50 +345,77 @@ class GXSettings extends javax.swing.JDialog implements ActionListener {
                                                 javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addContainerGap()));
 
+        JPanel WaittimePanel = new JPanel();
+        WaittimePanel.setPreferredSize(new Dimension(298, 35));
+
+        JLabel WaittimeLbl = new JLabel();
+        WaittimeLbl.setText("Wait time:");
+
+        WaittimeTB = new JTextField();
+        WaittimeTB.setText("0");
+        GroupLayout gl_WaittimePanel = new GroupLayout(WaittimePanel);
+        gl_WaittimePanel.setHorizontalGroup(gl_WaittimePanel
+                .createParallelGroup(Alignment.LEADING)
+                .addGap(0, 341, Short.MAX_VALUE)
+                .addGroup(gl_WaittimePanel.createSequentialGroup()
+                        .addContainerGap().addComponent(WaittimeLbl)
+                        .addPreferredGap(ComponentPlacement.RELATED, 64,
+                                Short.MAX_VALUE)
+                        .addComponent(WaittimeTB, GroupLayout.PREFERRED_SIZE,
+                                213, GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap()));
+        gl_WaittimePanel.setVerticalGroup(gl_WaittimePanel
+                .createParallelGroup(Alignment.TRAILING)
+                .addGap(0, 42, Short.MAX_VALUE)
+                .addGroup(gl_WaittimePanel.createSequentialGroup()
+                        .addContainerGap(GroupLayout.DEFAULT_SIZE,
+                                Short.MAX_VALUE)
+                        .addGroup(gl_WaittimePanel
+                                .createParallelGroup(Alignment.BASELINE)
+                                .addComponent(WaittimeLbl).addComponent(
+                                        WaittimeTB, GroupLayout.PREFERRED_SIZE,
+                                        GroupLayout.DEFAULT_SIZE,
+                                        GroupLayout.PREFERRED_SIZE))
+                        .addContainerGap()));
+        WaittimePanel.setLayout(gl_WaittimePanel);
+
         javax.swing.GroupLayout jPanel1Layout =
                 new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(jPanel1Layout
-                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(ipAddressPanel,
-                        javax.swing.GroupLayout.DEFAULT_SIZE, 321,
-                        Short.MAX_VALUE)
-                .addComponent(portPanel, javax.swing.GroupLayout.DEFAULT_SIZE,
-                        321, Short.MAX_VALUE)
-                .addComponent(serverPanel, javax.swing.GroupLayout.DEFAULT_SIZE,
-                        321, Short.MAX_VALUE)
-                .addComponent(protocolPanel,
-                        javax.swing.GroupLayout.DEFAULT_SIZE, 321,
-                        Short.MAX_VALUE));
+        jPanel1Layout.setHorizontalGroup(
+                jPanel1Layout.createParallelGroup(Alignment.LEADING)
+                        .addComponent(ipAddressPanel, GroupLayout.DEFAULT_SIZE,
+                                341, Short.MAX_VALUE)
+                        .addComponent(portPanel, GroupLayout.DEFAULT_SIZE, 341,
+                                Short.MAX_VALUE)
+                        .addComponent(serverPanel, GroupLayout.DEFAULT_SIZE,
+                                341, Short.MAX_VALUE)
+                        .addComponent(protocolPanel, GroupLayout.DEFAULT_SIZE,
+                                341, Short.MAX_VALUE)
+                        .addComponent(WaittimePanel, GroupLayout.DEFAULT_SIZE,
+                                351, Short.MAX_VALUE));
         jPanel1Layout.setVerticalGroup(jPanel1Layout
-                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING,
-                        jPanel1Layout.createSequentialGroup()
-                                .addComponent(serverPanel,
-                                        javax.swing.GroupLayout.PREFERRED_SIZE,
-                                        javax.swing.GroupLayout.DEFAULT_SIZE,
-                                        javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(
-                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(ipAddressPanel,
-                                        javax.swing.GroupLayout.PREFERRED_SIZE,
-                                        41,
-                                        javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(
-                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(portPanel,
-                                        javax.swing.GroupLayout.PREFERRED_SIZE,
-                                        42,
-                                        javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(
-                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(protocolPanel,
-                                        javax.swing.GroupLayout.PREFERRED_SIZE,
-                                        javax.swing.GroupLayout.DEFAULT_SIZE,
-                                        javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap(
-                                        javax.swing.GroupLayout.DEFAULT_SIZE,
-                                        Short.MAX_VALUE)));
+                .createParallelGroup(Alignment.TRAILING)
+                .addGroup(Alignment.LEADING, jPanel1Layout
+                        .createSequentialGroup()
+                        .addComponent(serverPanel, GroupLayout.PREFERRED_SIZE,
+                                GroupLayout.DEFAULT_SIZE,
+                                GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(ComponentPlacement.RELATED)
+                        .addComponent(ipAddressPanel,
+                                GroupLayout.PREFERRED_SIZE, 41,
+                                GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(ComponentPlacement.RELATED)
+                        .addComponent(portPanel, GroupLayout.PREFERRED_SIZE, 42,
+                                GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(ComponentPlacement.RELATED)
+                        .addComponent(protocolPanel, GroupLayout.PREFERRED_SIZE,
+                                GroupLayout.DEFAULT_SIZE,
+                                GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(ComponentPlacement.RELATED)
+                        .addComponent(WaittimePanel, GroupLayout.PREFERRED_SIZE,
+                                42, GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(35, Short.MAX_VALUE)));
+        jPanel1.setLayout(jPanel1Layout);
 
         okBtn.setText("OK");
         okBtn.addActionListener(new java.awt.event.ActionListener() {
@@ -400,36 +435,26 @@ class GXSettings extends javax.swing.JDialog implements ActionListener {
 
         javax.swing.GroupLayout layout =
                 new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(layout
-                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        layout.setHorizontalGroup(layout.createParallelGroup(Alignment.TRAILING)
                 .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel1,
-                                javax.swing.GroupLayout.PREFERRED_SIZE,
-                                javax.swing.GroupLayout.DEFAULT_SIZE,
-                                javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 11, Short.MAX_VALUE))
-                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout
-                        .createSequentialGroup()
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE,
-                                Short.MAX_VALUE)
+                        .addContainerGap(220, Short.MAX_VALUE)
                         .addComponent(okBtn)
-                        .addPreferredGap(
-                                javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(cancelBtn).addContainerGap()));
-        layout.setVerticalGroup(layout
-                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addPreferredGap(ComponentPlacement.UNRELATED)
+                        .addComponent(cancelBtn).addContainerGap())
+                .addGroup(Alignment.LEADING, layout.createSequentialGroup()
+                        .addComponent(jPanel1, GroupLayout.PREFERRED_SIZE,
+                                GroupLayout.DEFAULT_SIZE,
+                                GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(11, Short.MAX_VALUE)));
+        layout.setVerticalGroup(layout.createParallelGroup(Alignment.LEADING)
                 .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel1,
-                                javax.swing.GroupLayout.PREFERRED_SIZE,
-                                javax.swing.GroupLayout.DEFAULT_SIZE,
-                                javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addGroup(layout
-                                .createParallelGroup(
-                                        javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jPanel1, GroupLayout.PREFERRED_SIZE, 234,
+                                GroupLayout.PREFERRED_SIZE)
+                        .addGap(26)
+                        .addGroup(layout.createParallelGroup(Alignment.BASELINE)
                                 .addComponent(cancelBtn).addComponent(okBtn))
                         .addContainerGap()));
+        getContentPane().setLayout(layout);
 
         pack();
     }
@@ -457,6 +482,8 @@ class GXSettings extends javax.swing.JDialog implements ActionListener {
             target.setServer(this.serverCB.isSelected());
             target.setProtocol(
                     getProtocol(this.protocol.getSelectedItem().toString()));
+            target.setConnectionWaitTime(
+                    Integer.parseInt(WaittimeTB.getText()));
             accepted = true;
             this.dispose();
         } catch (Exception ex) {

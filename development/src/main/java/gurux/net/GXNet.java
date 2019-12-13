@@ -40,6 +40,7 @@ import java.io.StringReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -150,6 +151,11 @@ public class GXNet implements IGXMedia2, AutoCloseable {
      * Listener thread.
      */
     private ListenerThread listenerThread = null;
+
+    /**
+     * How long connection can take.
+     */
+    private int connectionWaitTime = 0;
 
     /**
      * Constructor.
@@ -511,7 +517,15 @@ public class GXNet implements IGXMedia2, AutoCloseable {
                 // Create a stream-based, TCP socket using the InterNetwork
                 // Address Family.
                 if (getProtocol() == NetworkType.TCP) {
-                    socket = new Socket(getHostName(), getPort());
+                    // If value is zero OS wait time is used.
+                    if (connectionWaitTime == 0) {
+                        socket = new Socket(getHostName(), getPort());
+                    } else {
+                        socket = new Socket();
+                        ((Socket) socket).connect(
+                                new InetSocketAddress(getHostName(), getPort()),
+                                connectionWaitTime);
+                    }
                 } else if (getProtocol() == NetworkType.UDP) {
                     socket = new DatagramSocket();
                 } else {
@@ -684,6 +698,31 @@ public class GXNet implements IGXMedia2, AutoCloseable {
         if (server != value) {
             server = value;
             notifyPropertyChanged("Server");
+        }
+    }
+
+    /**
+     * Gets how long (milliseconds) server answer is waited when connection is
+     * made. Operating system time is used if value is zero.
+     * 
+     * @return Wait time in milliseconds.
+     */
+    public final int getConnectionWaitTime() {
+        return connectionWaitTime;
+    }
+
+    /**
+     * Sets how long (milliseconds) server answer is waited when connection is
+     * made. Operating system time is used if value is zero.
+     * 
+     * @param value
+     *            Wait time in milliseconds.
+     */
+    public final void setConnectionWaitTime(final int value) {
+        boolean change = connectionWaitTime != value;
+        connectionWaitTime = value;
+        if (change) {
+            notifyPropertyChanged("ConnectionWaitTime");
         }
     }
 
