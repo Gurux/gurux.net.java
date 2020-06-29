@@ -39,10 +39,9 @@
     <dependency>
       <groupId>org.gurux</groupId>
       <artifactId>gurux.net</artifactId>
-      <version>1.0.20</version>
+      <version>1.0.21</version>
     </dependency>
   </dependencies>
-
   <licenses>
     <license>
       <name>GNU General Public License, version 2</name>
