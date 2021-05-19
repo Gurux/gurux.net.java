@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 
@@ -272,8 +273,12 @@ class ReceiveThread extends Thread {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
                     ((DatagramSocket) socket).receive(receivePacket);
-                    handleReceivedData(receivePacket.getLength(),
-                            receivePacket.getSocketAddress().toString());
+                    InetSocketAddress socketAddress =
+                            (InetSocketAddress) receivePacket
+                                    .getSocketAddress();
+                    String address = socketAddress.getHostName() + ":"
+                            + String.valueOf(socketAddress.getPort());
+                    handleReceivedData(receivePacket.getLength(), address);
                 } catch (java.net.SocketException e) {
                     break;
                 } catch (IOException ex) {

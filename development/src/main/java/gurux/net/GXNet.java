@@ -441,10 +441,14 @@ public class GXNet implements IGXMedia2, AutoCloseable {
                     info = target;
                 }
 
-                String[] tmp = info.split(":");
-                InetAddress addr = InetAddress.getByName(tmp[0]);
+                int index = info.lastIndexOf(":");
+                if (index == -1) {
+                    throw new RuntimeException("Port is missing.");
+                }
+                InetAddress addr =
+                        InetAddress.getByName(info.substring(0, index));
                 DatagramPacket p = new DatagramPacket(buff, buff.length, addr,
-                        Integer.parseInt(tmp[1]));
+                        Integer.parseInt(info.substring(1 + index)));
                 ((DatagramSocket) socket).send(p);
             }
         } else {
