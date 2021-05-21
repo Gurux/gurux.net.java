@@ -247,7 +247,6 @@ public class GXNet implements IGXMedia2, AutoCloseable {
      */
     @Override
     protected final void finalize() throws Throwable {
-        super.finalize();
         if (isOpen()) {
             close();
         }
