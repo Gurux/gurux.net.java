@@ -36,12 +36,13 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
@@ -112,6 +113,9 @@ class GXSettings extends javax.swing.JDialog implements ActionListener {
      * Protocol panel includes label and text box.
      */
     private javax.swing.JPanel protocolPanel;
+
+    javax.swing.JLabel waittimeLbl = new javax.swing.JLabel();
+
     /**
      * Server combo box.
      */
@@ -135,9 +139,11 @@ class GXSettings extends javax.swing.JDialog implements ActionListener {
      *            Is Dialog shown as modal.
      * @param comp
      *            Media component where settings are get and set.
+     * @param locale
+     *            Used locale.
      */
     GXSettings(final java.awt.Frame parent, final boolean modal,
-            final GXNet comp) {
+            final GXNet comp, final Locale locale) {
         super(parent, modal);
         super.setLocationRelativeTo(parent);
         initComponents();
@@ -150,6 +156,17 @@ class GXSettings extends javax.swing.JDialog implements ActionListener {
         this.serverCB.setSelected(target.getServer());
         this.protocol.setSelectedItem(getProtocol(target.getProtocol()));
         WaittimeTB.setText(String.valueOf(target.getConnectionWaitTime()));
+
+        // Localize strings.
+        ResourceBundle bundle = ResourceBundle.getBundle("resources", locale);
+        this.setTitle(bundle.getString("SettingsTxt"));
+        ipAddressLbl.setText(bundle.getString("HostNameTxt"));
+        portLbl.setText(bundle.getString("PortTxt"));
+        serverCB.setText(bundle.getString("ServerTxt"));
+        protocolLbl.setText(bundle.getString("ProtocolTxt"));
+        // TODO: waittimeLbl.setText(bundle.getString("WaittimeTxt"));
+        okBtn.setText(bundle.getString("OK"));
+        cancelBtn.setText(bundle.getString("Cancel"));
     }
 
     /**
@@ -348,8 +365,7 @@ class GXSettings extends javax.swing.JDialog implements ActionListener {
         JPanel WaittimePanel = new JPanel();
         WaittimePanel.setPreferredSize(new Dimension(298, 35));
 
-        JLabel WaittimeLbl = new JLabel();
-        WaittimeLbl.setText("Wait time:");
+        waittimeLbl.setText("Wait time:");
 
         WaittimeTB = new JTextField();
         WaittimeTB.setText("0");
@@ -358,7 +374,7 @@ class GXSettings extends javax.swing.JDialog implements ActionListener {
                 .createParallelGroup(Alignment.LEADING)
                 .addGap(0, 341, Short.MAX_VALUE)
                 .addGroup(gl_WaittimePanel.createSequentialGroup()
-                        .addContainerGap().addComponent(WaittimeLbl)
+                        .addContainerGap().addComponent(waittimeLbl)
                         .addPreferredGap(ComponentPlacement.RELATED, 64,
                                 Short.MAX_VALUE)
                         .addComponent(WaittimeTB, GroupLayout.PREFERRED_SIZE,
@@ -372,7 +388,7 @@ class GXSettings extends javax.swing.JDialog implements ActionListener {
                                 Short.MAX_VALUE)
                         .addGroup(gl_WaittimePanel
                                 .createParallelGroup(Alignment.BASELINE)
-                                .addComponent(WaittimeLbl).addComponent(
+                                .addComponent(waittimeLbl).addComponent(
                                         WaittimeTB, GroupLayout.PREFERRED_SIZE,
                                         GroupLayout.DEFAULT_SIZE,
                                         GroupLayout.PREFERRED_SIZE))
@@ -484,6 +500,7 @@ class GXSettings extends javax.swing.JDialog implements ActionListener {
                     getProtocol(this.protocol.getSelectedItem().toString()));
             target.setConnectionWaitTime(
                     Integer.parseInt(WaittimeTB.getText()));
+            target.validate();
             accepted = true;
             this.dispose();
         } catch (Exception ex) {

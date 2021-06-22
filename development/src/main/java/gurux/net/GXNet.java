@@ -45,6 +45,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -158,6 +160,11 @@ public class GXNet implements IGXMedia2, AutoCloseable {
     private int connectionWaitTime = 0;
 
     /**
+     * Used locale
+     */
+    private Locale locale;
+
+    /**
      * Constructor.
      */
     public GXNet() {
@@ -165,6 +172,7 @@ public class GXNet implements IGXMedia2, AutoCloseable {
                 new GXSynchronousMediaBase(ReceiveThread.RECEIVE_BUFFER_SIZE);
         setConfigurableSettings(AvailableMediaSettings.ALL.getValue());
         setProtocol(NetworkType.TCP);
+        locale = Locale.getDefault();
     }
 
     /**
@@ -382,7 +390,7 @@ public class GXNet implements IGXMedia2, AutoCloseable {
 
     @Override
     public final boolean properties(final javax.swing.JFrame parent) {
-        GXSettings dlg = new GXSettings(parent, true, this);
+        GXSettings dlg = new GXSettings(parent, true, this, locale);
         dlg.pack();
         dlg.setVisible(true);
         return dlg.isAccepted();
@@ -939,10 +947,15 @@ public class GXNet implements IGXMedia2, AutoCloseable {
     @Override
     public final void validate() {
         if (getPort() == 0) {
-            throw new RuntimeException("Invalid port name.");
+            // Localize strings.
+            ResourceBundle bundle =
+                    ResourceBundle.getBundle("resources", locale);
+            throw new RuntimeException(bundle.getString("InvalidPortName"));
         }
         if (getHostName() == null || "".equals(getHostName())) {
-            throw new RuntimeException("Invalid host name.");
+            ResourceBundle bundle =
+                    ResourceBundle.getBundle("resources", locale);
+            throw new RuntimeException(bundle.getString("InvalidHostName"));
         }
     }
 
@@ -999,5 +1012,13 @@ public class GXNet implements IGXMedia2, AutoCloseable {
     @Override
     public Object getAsyncWaitHandle() {
         return null;
+    }
+
+    public Locale getLocale() {
+        return locale;
+    }
+
+    public void setLocale(Locale locale) {
+        this.locale = locale;
     }
 }
