@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.gurux</groupId>
   <artifactId>gurux.net</artifactId>
-  <version>1.0.24-SNAPSHOT</version>
+  <version>1.0.25-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>gurux.net.java</name>
   <url>http://www.gurux.org</url>
@@ -34,7 +34,6 @@
     <connection>scm:git:https://github.com/gurux/gurux.net.java.git</connection>
     <url>https://github.com/gurux/gurux.net.java</url>
     <developerConnection>scm:git:https://github.com/gurux/gurux.net.java.git</developerConnection>
-    <tag>HEAD</tag>
   </scm>
 
   <!-- Update component to Central repository. -->
@@ -75,13 +74,6 @@
           <releaseProfiles>releases</releaseProfiles>
         </configuration>
       </plugin>
-    </plugins>
-  </build>
-  <profiles>
-    <profile>
-      <id>releases</id>
-      <build>
-        <plugins>
 	      <plugin>
 	        <artifactId>maven-source-plugin</artifactId>
 	        <version>3.2.0</version>
@@ -106,6 +98,9 @@
                 <goals>
                   <goal>sign</goal>
                 </goals>
+          <configuration>
+            <keyname>${gpg.keyname}</keyname>
+          </configuration>
               </execution>
             </executions>
           </plugin>
@@ -121,11 +116,8 @@
               <autoReleaseAfterClose>true</autoReleaseAfterClose>
             </configuration>
           </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
-
+    </plugins>
+  </build>
   <dependencies>
     <dependency>
       <groupId>org.gurux</groupId>
@@ -135,7 +127,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.12</version>
+      <version>4.13</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
