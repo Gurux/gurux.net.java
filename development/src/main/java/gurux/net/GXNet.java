@@ -1014,11 +1014,19 @@ public class GXNet implements IGXMedia2, AutoCloseable {
         return null;
     }
 
+    /**
+     * @return Used locale.
+     */
     public Locale getLocale() {
         return locale;
     }
 
-    public void setLocale(Locale locale) {
-        this.locale = locale;
+    /**
+     * 
+     * @param value
+     *            Used locale.
+     */
+    public void setLocale(final Locale value) {
+        locale = value;
     }
 }

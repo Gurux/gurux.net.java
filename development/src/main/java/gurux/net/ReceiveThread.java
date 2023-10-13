@@ -84,7 +84,7 @@ class ReceiveThread extends Thread {
     /**
      * Size of receive buffer.
      */
-    public static final int RECEIVE_BUFFER_SIZE = 1024;
+    public static final int RECEIVE_BUFFER_SIZE = 1100;
 
     /**
      * Constructor.
