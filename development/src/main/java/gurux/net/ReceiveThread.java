@@ -81,10 +81,11 @@ class ReceiveThread extends Thread {
      */
     private long bytesReceived = 0;
 
+    byte[] receiveBuffer = new byte[1518];
     /**
-     * Size of receive buffer.
+     * Size of receive buffer. Ethernet maximum frame size is 1518 bytes.
      */
-    public static final int RECEIVE_BUFFER_SIZE = 1100;
+    public static final int RECEIVE_BUFFER_SIZE = 1518;
 
     /**
      * Constructor.
