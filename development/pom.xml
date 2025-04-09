@@ -27,14 +27,13 @@
   </developers>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>7</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>
+   <maven.compiler.source>8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
   </properties>
   <scm>
     <connection>scm:git:https://github.com/gurux/gurux.net.java.git</connection>
     <url>https://github.com/gurux/gurux.net.java</url>
-    <developerConnection>scm:git:https://github.com/gurux/gurux.net.java.git</developerConnection>
-    <tag>v1.0.27</tag>
+    <developerConnection>scm:git:https://github.com/gurux/gurux.net.java.git</developerConnection>   
   </scm>
 
   <!-- Update component to Central repository. -->
