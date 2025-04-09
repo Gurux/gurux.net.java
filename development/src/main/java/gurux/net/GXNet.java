@@ -579,7 +579,15 @@ public class GXNet implements IGXMedia2, AutoCloseable {
                 listenerThread.interrupt();
                 listenerThread = null;
             } else if (receiverThread != null) {
-                receiverThread.interrupt();
+                try {
+                    receiverThread.interrupt();
+                    if (socket instanceof Socket) {
+                        ((Socket) socket).shutdownOutput();
+                        // Wait until the server has send ACK.
+                        receiverThread.join();
+                    }
+                } catch (InterruptedException | IOException e) {
+                }
                 receiverThread = null;
             }
             try {
@@ -1028,5 +1036,10 @@ public class GXNet implements IGXMedia2, AutoCloseable {
      */
     public void setLocale(final Locale value) {
         locale = value;
+    }
+
+    @Override
+    public String toString() {
+        return "GXNet " + getName();
     }
 }

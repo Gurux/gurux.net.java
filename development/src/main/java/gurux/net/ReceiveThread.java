@@ -42,7 +42,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketException;
 
 import gurux.common.AutoResetEvent;
 import gurux.common.GXSynchronousMediaBase;
@@ -196,12 +195,13 @@ class ReceiveThread extends Thread {
      *             occurred exception.
      * @throws InterruptedException
      */
-    private void handleTCP(final Socket s)
+    private boolean handleTCP(final Socket s)
             throws IOException, InterruptedException {
         DataInputStream in = new DataInputStream(s.getInputStream());
         int count = in.read(buffer, 0, 1);
         if (count == -1) {
-            throw new SocketException();
+            in.close();
+            return false;
         }
         Thread.sleep(parentMedia.getReceiveDelay());
         while (in.available() != 0) {
@@ -218,6 +218,7 @@ class ReceiveThread extends Thread {
             }
         }
         handleReceivedData(count, s.getRemoteSocketAddress().toString());
+        return true;
     }
 
     /**
@@ -234,7 +235,9 @@ class ReceiveThread extends Thread {
             String info = String.valueOf(s.getRemoteSocketAddress());
             while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    handleTCP(s);
+                    if (!handleTCP(s)) {
+                        break;
+                    }
                 } catch (java.net.SocketException e) {
                     if (parentMedia.getServer()) {
                         // Client has close the connection.
