@@ -583,8 +583,8 @@ public class GXNet implements IGXMedia2, AutoCloseable {
                     receiverThread.interrupt();
                     if (socket instanceof Socket) {
                         ((Socket) socket).shutdownOutput();
-                        // Wait until the server has send ACK.
-                        receiverThread.join();
+                        // Wait until the client has received server's ACK.
+                        receiverThread.join(10000);
                     }
                 } catch (InterruptedException | IOException e) {
                 }

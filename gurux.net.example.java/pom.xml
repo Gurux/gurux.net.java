@@ -39,7 +39,7 @@
     <dependency>
       <groupId>org.gurux</groupId>
       <artifactId>gurux.net</artifactId>
-      <version>1.0.29</version>
+      <version>1.0.30</version>
     </dependency>
   </dependencies>
   <licenses>
