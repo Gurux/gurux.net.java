@@ -164,6 +164,8 @@ public class GXNet implements IGXMedia2, AutoCloseable {
      */
     private Locale locale;
 
+    private boolean shutdownInput;
+
     /**
      * Constructor.
      */
@@ -582,6 +584,9 @@ public class GXNet implements IGXMedia2, AutoCloseable {
                 try {
                     receiverThread.interrupt();
                     if (socket instanceof Socket) {
+                        if (shutdownInput) {
+                            ((Socket) socket).shutdownInput();
+                        }
                         ((Socket) socket).shutdownOutput();
                         // Wait until the client has received server's ACK.
                         receiverThread.join(10000);
@@ -1041,5 +1046,22 @@ public class GXNet implements IGXMedia2, AutoCloseable {
     @Override
     public String toString() {
         return "GXNet " + getName();
+    }
+
+    /**
+     * 
+     * @return Returns true if socket is shutdown on close.
+     */
+    public boolean isShutdownInput() {
+        return shutdownInput;
+    }
+
+    /**
+     * 
+     * @param value
+     *            Returns true if socket is shutdown on close.
+     */
+    public void setShutdownInput(final boolean value) {
+        shutdownInput = value;
     }
 }
